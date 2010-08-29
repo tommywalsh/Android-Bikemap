@@ -57,7 +57,7 @@ public class BikeMapActivity extends MapActivity implements LocationListener
 		    paint.setARGB(255,0,255,0);
 		    paint.setStyle(Paint.Style.STROKE);
 		}
-		canvas.drawCircle(screenCoords.x, screenCoords.y, 5, paint);
+		canvas.drawCircle(screenCoords.x, screenCoords.y, 10, paint);
 
 		}
 	    return true;
@@ -70,7 +70,6 @@ public class BikeMapActivity extends MapActivity implements LocationListener
         setContentView(R.layout.main);
 	
 	m_locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-	m_locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 50, this);
 	
 	MapView mapview = (MapView) findViewById(R.id.mapview);
 	mapview.setBuiltInZoomControls(true);
@@ -86,6 +85,17 @@ public class BikeMapActivity extends MapActivity implements LocationListener
     @Override protected boolean isRouteDisplayed() {
 	return false;
     }
+
+    @Override protected void onStart() {
+	super.onStart();
+	m_locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 50, this);
+    }
+
+    @Override protected void onStop() {
+	super.onStop();
+	m_locManager.removeUpdates(this);
+    }
+
 
     MapController m_controller;
     LocationManager m_locManager;

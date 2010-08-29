@@ -56,24 +56,20 @@ public class RouteOverlay extends Overlay
 			mv.getProjection().toPixels(gp, thisPoint);
 			if (drewLastPoint) {
 			    // keep drawing
-			    Log.d("path", "toHere");
 			    m_path.lineTo(thisPoint.x, thisPoint.y); 
 			} else if (i != 0) {
 			    // draw from the last off-screen point
-			    Log.d("path", "toHereFromOffscreen");
 			    mv.getProjection().toPixels(m_route.elementAt(i-1), otherPoint);
 			    m_path.moveTo(otherPoint.x, otherPoint.y);
 			    m_path.lineTo(thisPoint.x, thisPoint.y); 
 			} else {
 			    // start here
-			    Log.d("path", "startHere");
 			    m_path.moveTo(thisPoint.x, thisPoint.y);
 			}
 			drewLastPoint = true;
 		    } else {
 			// This point is not in view.  Draw to here if we're the first off-screen point
 			if (drewLastPoint) {
-			    Log.d("path", "toOffscreen");
 			    mv.getProjection().toPixels(gp, thisPoint);
 			    m_path.lineTo(thisPoint.x, thisPoint.y);
 			}
@@ -85,11 +81,11 @@ public class RouteOverlay extends Overlay
 	    if (!m_path.isEmpty()) {
 		Paint mPaint = new Paint();
 		mPaint.setDither(true);
-		mPaint.setColor(Color.RED);
+		mPaint.setARGB(126,0,126,255);
 		mPaint.setStyle(Paint.Style.STROKE);
 		mPaint.setStrokeJoin(Paint.Join.ROUND);
 		mPaint.setStrokeCap(Paint.Cap.ROUND);
-		mPaint.setStrokeWidth(2);
+		mPaint.setStrokeWidth(5);
 		
 		canvas.drawPath(m_path, mPaint);
 	    }
