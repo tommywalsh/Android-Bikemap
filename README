@@ -1,0 +1,6 @@
+
+You must run "android update project" before being able to build on a
+particular machine.
+
+After that, use ant to build.
+
