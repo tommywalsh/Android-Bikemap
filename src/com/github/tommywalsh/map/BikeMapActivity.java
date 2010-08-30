@@ -49,7 +49,7 @@ public class BikeMapActivity extends MapActivity implements LocationListener
 
 		Paint paint = new Paint();		
 		mapView.getProjection().toPixels(m_location, screenCoords);
-		paint.setStrokeWidth(1);
+		paint.setStrokeWidth(3);
 		if (shadow) {
 		    paint.setARGB(255,0,0,255);
 		    paint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -101,6 +101,7 @@ public class BikeMapActivity extends MapActivity implements LocationListener
     LocationManager m_locManager;
     GeoPoint m_location;
     RouteOverlay m_route = new RouteOverlay();
+
 }
 
 
