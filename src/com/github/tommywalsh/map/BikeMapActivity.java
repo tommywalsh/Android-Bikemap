@@ -16,14 +16,16 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Paint;
 
-import android.util.Log;
-
 import java.util.TreeSet;
 
+
+// This activity handles the Map application.
 public class BikeMapActivity extends MapActivity implements LocationListener
 {
+
     Location m_oldLoc;
     public void onLocationChanged(Location loc) {
+	// Always make sure our current position is centered on the screen
 	if (loc != null && !loc.equals(m_oldLoc)) {
 	    m_oldLoc = loc;
 	    m_location = new GeoPoint((int)(loc.getLatitude() * 1E6),
@@ -39,6 +41,8 @@ public class BikeMapActivity extends MapActivity implements LocationListener
     }
 
 
+
+    // Draw a little circle at our current position
     public class LocationIndicator extends Overlay {
 	
 	public boolean draw(Canvas canvas, MapView mapView, boolean shadow, long when) {
@@ -65,6 +69,8 @@ public class BikeMapActivity extends MapActivity implements LocationListener
     }
 
 
+
+    
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
@@ -92,6 +98,7 @@ public class BikeMapActivity extends MapActivity implements LocationListener
     }
 
     @Override protected void onStop() {
+	// Conserve battery by not asking for location updates when we're not visible
 	super.onStop();
 	m_locManager.removeUpdates(this);
     }
