@@ -1,6 +1,41 @@
 
-You must run "android update project" before being able to build on a
-particular machine.
+This is a simple map app that I wrote to help me out on bike trips.
 
-After that, use ant to build.
+Here is what I wanted:
+- A map which scrolls as I ride
+- A visual indicator of my current position
+- A visual display of my planned route
+
+Here is what I DIDN'T WANT:
+- Speed/distance/time tracking (I have a bike computer for that which uses much less battery power)
+- Map scrolling randomly as accelerometer goes nuts when I ride over bumps
+- Data collection of route traveled, elevation gains, etc.
+
+I didn't find anything out there, so I wrote my own.
+
+Note that this is a very simple app, and unlikely to be what anyone else in the world wants... 
+but if you do want to use it, here's what you need to do:
+
+1) Install a *SECURE* phone holder on your bike.  The 'quick release' car mounts don't do the job!
+I can testify to this as I tried it, and had my phone break loose at 35mph and skid across the road.
+The zip-up motorcycle mounts are generally okay for stability, but even these sometimes slip off.  
+I had to screw the holder to the handlebar mount.  Also, the touch screen does not work through the
+plastic as well as they lead you to beleive.
+
+2) Set up your phone so that it doesn't switch between 'landscape' and 'portrait' modes as you turn the phone.
+This can be addressed in software in future... Someday I may make this app "lock" the portrait view.  This
+is necessary because otherwise the phone senses road bumps and switches back and forth incessantly.
+
+3) Set up your phone so that it does not shut off the screen after a period of inactivity.  This, also, may
+be addressed in software in the future.
+
+4) Install the Android development kit on your computer.
+
+5) Run "android update project" once.
+
+6) Plug in your phone and use "ant install" to install it.
+
+7) Save your planned route as a KML file as /sdcard/mapdata/route.kml
+
+8) Ride!
 
