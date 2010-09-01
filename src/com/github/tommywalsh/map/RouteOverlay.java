@@ -16,8 +16,6 @@ import android.graphics.Path;
 import android.graphics.Color;
 import android.os.Handler;
 
-import android.util.Log;
-
 
 // This class handles drawing of a path on a map.
 // The path is stored as KML file, and displayed as a semi-translucent overlay 
@@ -26,10 +24,11 @@ public class RouteOverlay extends Overlay
 {
 
     public RouteOverlay() {
-	// Kick off our data loading (on another thread), and immediately return
-	startIOProcess();
     }
 
+    public void loadDataSet(String filename) {
+	startIOProcess(filename);	
+    }
 
     // Called periodically by the Android system when it wants us to redraw the path
     public void draw(Canvas canvas, MapView mv, boolean shadow) {
@@ -189,13 +188,21 @@ public class RouteOverlay extends Overlay
 	};
 
     
-    private void startIOProcess() {
+    private void startIOProcess(final String filename) {
+
+	// clear our caches so we don't draw an old path while we wait
+	// for the data
+	m_loaded = false;
+	m_legs = null;
+	m_path = null;
+	m_lastCenter = null;
+
 	Thread t = new Thread() {
 		public void run() {
 
 		    // This runs on its own thread.
 		    // It's okay to take our sweet time loading data here.
-		    m_legs = KMLParser.parse("/sdcard/mapdata/route.kml");
+		    m_legs = KMLParser.parse(filename);
 
 		    // Notify the UI thread that we're done (this will cause m_IODoneUpdater.run to run on the UI thread)
 		    m_handler.post(m_IODoneUpdater);

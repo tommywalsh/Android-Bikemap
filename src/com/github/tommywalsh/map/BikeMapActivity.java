@@ -19,7 +19,7 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Paint;
 
-import java.util.TreeSet;
+
 
 
 // This activity handles the Map application.
@@ -109,19 +109,27 @@ public class BikeMapActivity extends MapActivity implements LocationListener
     @Override public boolean onCreateOptionsMenu(Menu menu) {
 	MenuInflater inflater = getMenuInflater();
 	inflater.inflate(R.menu.main_menu, menu);
+	m_kmlMenu = new KMLSubmenu(menu);
 	return true;
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-	switch (item.getItemId()) {
+	int id = item.getItemId();
+	switch (id) {
 	case R.id.quit:
 	    this.finish();
 	    return true;
 	default:
-	    return super.onOptionsItemSelected(item);
+	    boolean retval = m_kmlMenu.processSelection(id, m_route);
+	    if (!retval) {
+		retval = super.onOptionsItemSelected(item);	       
+	    }
+	    return retval;
 	}
     }
+
     
+    KMLSubmenu m_kmlMenu;
     MapController m_controller;
     LocationManager m_locManager;
     GeoPoint m_location;
