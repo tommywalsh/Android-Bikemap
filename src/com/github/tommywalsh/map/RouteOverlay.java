@@ -167,10 +167,15 @@ public class RouteOverlay extends Overlay
     // We do our IO operations in another thread.  It can take in a while to read in a whole bike trip's
     // worth of position data.  Don't hang the UI thread during this time! 
 
+// If we draw before we load our data, cache the mapview so we can force it to redraw    
+    MapView m_mapView = null;        
 
-    MapView m_mapView = null;        // If we draw before we load our data, cache the mapview so we can force it to redraw    
-    boolean m_loaded = false;        // ONLY to be used on the UI thread!
-    Vector<TripLeg> m_legs = null;   // m_legs is not safe to access unless m_loaded is true
+    // ONLY to be used on the UI thread!
+    // "true" because we are trivially loaded at startup
+    boolean m_loaded = true;         
+
+    // m_legs is not safe to access unless m_loaded is true
+    Vector<TripLeg> m_legs = new Vector<TripLeg>();   
 
     final Handler m_handler = new Handler();
     final Runnable m_IODoneUpdater = new Runnable() {

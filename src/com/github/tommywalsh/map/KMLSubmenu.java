@@ -35,7 +35,7 @@ public class KMLSubmenu {
 	}
     }
 
-    private HashMap<Integer,File> m_idToFile;
+    private HashMap<Integer,File> m_idToFile = new HashMap<Integer, File>();
 
 
     boolean processSelection(int itemId, RouteOverlay routeOverlay) {
