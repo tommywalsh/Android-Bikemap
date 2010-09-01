@@ -35,7 +35,10 @@ be addressed in software in the future.
 
 6) Plug in your phone and use "ant install" to install it.
 
-7) Save your planned route as a KML file as /sdcard/mapdata/route.kml
+7) Save your planned route as a KML file in /sdcard/mapdata (make that directory if needed).
 
-8) Ride!
+8) Start the app, and use the menu to pick the KML data file you want to use.
+
+9) Ride!
+
 
