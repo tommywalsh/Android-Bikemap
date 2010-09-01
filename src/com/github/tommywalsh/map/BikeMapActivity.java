@@ -13,13 +13,12 @@ import android.location.Criteria;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
+import android.view.MotionEvent;
 import android.content.Context;
 import android.os.Bundle;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Paint;
-
-
 
 
 // This activity handles the Map application.
@@ -31,9 +30,11 @@ public class BikeMapActivity extends MapActivity implements LocationListener
 	// Always make sure our current position is centered on the screen
 	if (loc != null && !loc.equals(m_oldLoc)) {
 	    m_oldLoc = loc;
-	    m_location = new GeoPoint((int)(loc.getLatitude() * 1E6),
-			      (int)(loc.getLongitude() * 1E6));
-	    m_controller.animateTo(m_location);
+	    if (m_mode == LOCK) {
+		m_location = new GeoPoint((int)(loc.getLatitude() * 1E6),
+					  (int)(loc.getLongitude() * 1E6));
+		m_controller.animateTo(m_location);
+	    }
 	}
     }
     public void onProviderDisabled(String provider) {
@@ -66,7 +67,7 @@ public class BikeMapActivity extends MapActivity implements LocationListener
 		}
 		canvas.drawCircle(screenCoords.x, screenCoords.y, 10, paint);
 
-		}
+	    }
 	    return true;
 	}
     }
@@ -81,7 +82,7 @@ public class BikeMapActivity extends MapActivity implements LocationListener
 	m_locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 	
 	MapView mapview = (MapView) findViewById(R.id.mapview);
-	mapview.setBuiltInZoomControls(true);
+	mapview.setBuiltInZoomControls(false);
 	mapview.getOverlays().add(new LocationIndicator());
 	mapview.getOverlays().add(m_route);
 	
@@ -128,6 +129,44 @@ public class BikeMapActivity extends MapActivity implements LocationListener
 	}
     }
 
+
+    // The map has three modes:
+    // 1) Locked to your current position
+    // 2) Manual scroll/pan
+    // 3) Manual zoom in/out
+    private int m_mode = LOCK;
+    public static final int LOCK = 0;
+    public static final int ZOOM = 1;
+    public static final int PAN = 2;
+    private boolean m_moved = false;
+    @Override public boolean onTrackballEvent(MotionEvent event) {
+	switch (event.getAction()) {
+	case MotionEvent.ACTION_DOWN:
+	    m_moved = false;
+	    break;
+	case MotionEvent.ACTION_UP:
+	    if (!m_moved) {
+		m_mode++; if(m_mode > PAN) m_mode = LOCK;
+	    }
+	    break;
+	case MotionEvent.ACTION_MOVE:
+	    m_moved = true;
+	    if (m_mode == ZOOM) {
+		if (event.getY() > 0.0) {
+		    m_controller.zoomOut();
+		} else {
+		    m_controller.zoomIn();
+		}
+	    } else if (m_mode == PAN) {
+		int x = (int)(event.getX() * 30);
+		int y = (int)(event.getY() * 30);
+		m_controller.scrollBy(x, y);
+	    }
+	    break;
+	}
+		
+	return true;
+    }
     
     KMLSubmenu m_kmlMenu;
     MapController m_controller;
