@@ -10,6 +10,9 @@ import android.location.LocationManager;
 import android.location.LocationListener;
 import android.location.Location;
 import android.location.Criteria;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MenuInflater;
 import android.content.Context;
 import android.os.Bundle;
 import android.graphics.Canvas;
@@ -103,7 +106,22 @@ public class BikeMapActivity extends MapActivity implements LocationListener
 	m_locManager.removeUpdates(this);
     }
 
+    @Override public boolean onCreateOptionsMenu(Menu menu) {
+	MenuInflater inflater = getMenuInflater();
+	inflater.inflate(R.menu.main_menu, menu);
+	return true;
+    }
 
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+	switch (item.getItemId()) {
+	case R.id.quit:
+	    this.finish();
+	    return true;
+	default:
+	    return super.onOptionsItemSelected(item);
+	}
+    }
+    
     MapController m_controller;
     LocationManager m_locManager;
     GeoPoint m_location;

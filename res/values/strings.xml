@@ -2,4 +2,5 @@
 <resources>
   <string name="bikemap">Bike Map</string>
   <string name="app_name">Bike Map UI</string>
+  <string name="quit">Quit</string>
 </resources>
