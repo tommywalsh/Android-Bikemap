@@ -108,9 +108,9 @@ public class BikeMapActivity extends MapActivity implements LocationListener
     }
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
+	m_kmlMenu = new KMLSubmenu(menu);
 	MenuInflater inflater = getMenuInflater();
 	inflater.inflate(R.menu.main_menu, menu);
-	m_kmlMenu = new KMLSubmenu(menu);
 	return true;
     }
 

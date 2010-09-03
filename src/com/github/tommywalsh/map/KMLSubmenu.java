@@ -15,6 +15,8 @@ public class KMLSubmenu {
     KMLSubmenu (Menu parentMenu) {
  
 	SubMenu sm = parentMenu.addSubMenu(R.string.load_data);
+	sm.setIcon(R.drawable.ic_menu_directions);
+	sm.setHeaderIcon(R.drawable.ic_menu_directions);
 
 	final String path="/sdcard/mapdata";
 	File dir = new File(path);
