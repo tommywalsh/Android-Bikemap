@@ -72,8 +72,6 @@ public class BikeMapActivity extends MapActivity implements LocationListener
 	}
     }
 
-
-
     
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +88,8 @@ public class BikeMapActivity extends MapActivity implements LocationListener
 
 	m_controller.setZoom(16); // 16 seems best for biking speeds
 	m_controller.setCenter(new GeoPoint(42378778, -71095667)); // Union Square
+
+	updateTitle();
     }
 
     @Override protected boolean isRouteDisplayed() {
@@ -129,6 +129,22 @@ public class BikeMapActivity extends MapActivity implements LocationListener
 	}
     }
 
+    private void updateTitle()
+    {
+	String title = getString(R.string.app_name) + ": ";
+	switch (m_mode) {
+	case LOCK:
+	    title += getString(R.string.position_lock);
+	    break;
+	case ZOOM:
+	    title += getString(R.string.zoom);
+	    break;
+	case PAN:
+	    title += getString(R.string.pan);
+	    break;
+	}
+	setTitle(title);
+    }
 
     // The map has three modes:
     // 1) Locked to your current position
@@ -164,7 +180,7 @@ public class BikeMapActivity extends MapActivity implements LocationListener
 	    }
 	    break;
 	}
-		
+	updateTitle();
 	return true;
     }
     

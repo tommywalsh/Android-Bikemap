@@ -4,4 +4,7 @@
   <string name="app_name">Bike Map UI</string>
   <string name="quit">Quit</string>
   <string name="load_data">Load Data</string>
+  <string name="position_lock">Current Position</string>
+  <string name="pan">Pan</string>
+  <string name="zoom">Zoom</string>
 </resources>
