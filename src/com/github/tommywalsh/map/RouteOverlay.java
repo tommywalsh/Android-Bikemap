@@ -16,8 +16,6 @@ import android.graphics.Path;
 import android.graphics.Color;
 import android.os.Handler;
 
-import android.util.Log;
-
 // This class handles drawing of a path on a map.
 
 // The path is stored as KML file, and displayed as a semi-translucent overlay 
@@ -42,31 +40,46 @@ public class RouteOverlay extends Overlay
     // This function's job is to convert these into on-screen pixel positions,
     // and store them in a 'Path' that the canvas can draw on screen.
     // It caches its calculations and tries not to do more work than necessary
+    int m_lat;
+    int m_lng;
+    int m_latSpan;
+    int m_lngSpan;
     public void calculateNewPathIfNeeded(MapView mv)
     {
-	// Do we need to calculate a new path?  Only if we've moved since the last call
-	// Note, it might be more efficient to give a little "slop" to this, so that 
-	// a small amount of motion is allowed before recalulating the whole path.  In that
-	// case we'd simply translate() the path based on the number of pixels moved since last
-	// time.  But, we can't allow moves that are "too big" since the map projection change
-	// does not imply necessarily a pixel-for-pixel translation over larger distances.
+
+	boolean shouldCalculate = false;
 	GeoPoint ctr = mv.getMapCenter();
 	
-	if (m_path == null || !ctr.equals(m_lastCenter))  {
-	    // We need to calculate a new path
+	// If we don't yet have a path, that obviously means we need to calculate, and 
+	// we should also cache the view limits for next time
+	if (m_path == null) {
+	    shouldCalculate = true;
+	} else {
+	    // We already have a path, which means we must have cached values
+	    // See if we're "off the screen"
+	    // Otherwise, we'll just shift the pixels
+	    int lat = ctr.getLatitudeE6();
+	    int lng = ctr.getLatitudeE6();
+	    if (lat > m_lat + m_latSpan/2 ||
+		lat < m_lat - m_latSpan/2 ||
+		lng > m_lng + m_lngSpan/2 ||
+		lng < m_lng - m_lngSpan/2 ) {
+		shouldCalculate = true;
+	    }
+	}
+
+	if (shouldCalculate) {
+	    // Okay, we need to calculate a new path.  We'll make a path big enough to cover 9 screens.
+	    // (One each to the North, NE, E, SE, S, SW, W, and NW, and of course the real screen)
+	    // This allows us to wander all around the original screen all we want without having to recalculate
 	    m_path = new Path();
-	    
-	    // Figure screen span
-	    int latSpan = mv.getLatitudeSpan();
-	    int lat1 = ctr.getLatitudeE6() - latSpan/2;
-	    int lat2 = lat1 + latSpan;
-	    int lngSpan = mv.getLongitudeSpan();
-	    int lng1 = ctr.getLongitudeE6() - lngSpan/2;
-	    int lng2 = lng1 + lngSpan;
-	    
-	    // cache center for next time
-	    m_lastCenter = ctr;
-	    
+
+	    // So, lets set our 'area of interest'...
+	    m_lat = ctr.getLatitudeE6();
+	    m_lng = ctr.getLongitudeE6();
+	    m_latSpan = mv.getLatitudeSpan();
+	    m_lngSpan = mv.getLongitudeSpan();
+
 	    
 	    // Each tip may have one or more legs.  Try to draw them all
 	    for (TripLeg leg : m_legs) {
@@ -85,16 +98,19 @@ public class RouteOverlay extends Overlay
 		    Point otherPoint = new Point();
 		    
 		    
-		    if (lat >= lat1 && lat <= lat2 && lng >= lng1 && lng <= lng2) {
-			// this point is in view.  We will need to do some drawing
+		    if (lat >= (m_lat - m_latSpan*3/2) && 
+			lat <= (m_lat + m_latSpan*3/2) && 
+			lng >= (m_lng - m_lngSpan*3/2) && 
+			lng <= (m_lng + m_lngSpan*3/2)) {
+			// This point is in area of interest.  We will need to do some drawing
 			mv.getProjection().toPixels(gp, thisPoint);
 			if (drewLastPoint) {
-			    // Last point was also on screen... 
+			    // Last point was also in area of interest... 
 			    // The pen is on the paper.  Draw to the current point.
 			    m_path.lineTo(thisPoint.x, thisPoint.y); 
 			} else if (i != 0) {
-			    // The last point was off-screen.  Pick up the pen and put it there,
-			    // then draw to the current point.
+			    // The last point was out of the area of intersest.
+			    // Pick up the pen and put it there, then draw to the current point.
 			    mv.getProjection().toPixels(leg.elementAt(i-1), otherPoint);
 			    m_path.moveTo(otherPoint.x, otherPoint.y);
 			    m_path.lineTo(thisPoint.x, thisPoint.y); 
@@ -105,15 +121,26 @@ public class RouteOverlay extends Overlay
 			}
 			drewLastPoint = true;
 		    } else {
-			// This point is not on screen...
+			// This point is not in the area of interest...
 			if (drewLastPoint) {
-			    // ... but the last point was.  Draw to this off-screen point to finish the path
+			    // ... but the last point was.  Draw to this point to finish the path
 			    mv.getProjection().toPixels(gp, thisPoint);
 			    m_path.lineTo(thisPoint.x, thisPoint.y);
 			}
 			drewLastPoint = false;
 		    }
 		}
+	    }
+	} else {
+	    // Here, we don't need to calculate a whole new path, but we might need to move the existing one a bit
+	    Point lastPoint = new Point();
+	    Point thisPoint = new Point();
+	    mv.getProjection().toPixels(new GeoPoint(m_lat, m_lng), lastPoint);
+	    mv.getProjection().toPixels(ctr, thisPoint);
+	    float dx = thisPoint.x - lastPoint.x;
+	    float dy = thisPoint.y - lastPoint.y;
+	    if (dx != 0.0 || dy != 0.0) {
+		m_path.offset(dx, dy);
 	    }
 	}
     }
