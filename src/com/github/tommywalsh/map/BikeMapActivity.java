@@ -15,6 +15,8 @@ import android.view.MenuItem;
 import android.view.MenuInflater;
 import android.view.MotionEvent;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.graphics.Canvas;
 import android.graphics.Point;
@@ -43,7 +45,10 @@ public class BikeMapActivity extends MapActivity implements LocationListener
     }
     public void onStatusChanged(String provider, int status, Bundle extras) {
     }
-
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    }
 
 
     // Draw a little circle at our current position

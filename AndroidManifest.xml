@@ -15,7 +15,10 @@
     
     <uses-library android:name="com.google.android.maps" />
     
-    <activity android:name=".BikeMapActivity" android:label="@string/bikemap" android:launchMode="singleTask">
+    <activity android:name=".BikeMapActivity" 
+              android:label="@string/bikemap"
+              android:configChanges="orientation"
+              android:launchMode="singleTask">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.DEFAULT" />
