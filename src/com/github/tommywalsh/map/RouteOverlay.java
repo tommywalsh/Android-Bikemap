@@ -58,22 +58,22 @@ public class RouteOverlay extends Overlay
 	
 	// If we don't yet have a path, that obviously means we need to calculate, and 
 	// we should also cache the view limits for next time
-	if (m_path == null) {
+        if (m_path == null) {
 	    shouldCalculate = true;
 	} else {
 	    // We already have a path, which means we must have cached values
-	    // See if we're "off the screen"
-	    // Otherwise, we'll just shift the pixels
+            // If we've simply moved a bit without changing the zoom level, and have
+            // stayed on-screen, just shift pixels.
 	    int lat = ctr.getLatitudeE6();
 	    int lng = ctr.getLongitudeE6();
             if (lat < m_lat1 ||
                 lat > m_lat2 ||
                 lng < m_lng1 ||
-                lng > m_lng2) {
+                lng > m_lng2 ||
+                mv.getLongitudeSpan() != (m_lng2 - m_lng1)) {
 		shouldCalculate = true;
 	    }
 	}
-
 	if (shouldCalculate) {
 	    // Okay, we need to calculate a new path.  We'll make a path big enough to cover 9 screens.
 	    // (One each to the North, NE, E, SE, S, SW, W, and NW, and of course the real screen)
@@ -81,8 +81,8 @@ public class RouteOverlay extends Overlay
 	    m_path = new Path();
 
 	    // So, lets set our 'area of interest'...
-	    m_lat = ctr.getLatitudeE6();
-	    m_lng = ctr.getLongitudeE6();
+            m_lat = ctr.getLatitudeE6();
+            m_lng = ctr.getLongitudeE6();
 	    int latSpan = mv.getLatitudeSpan();
 	    int lngSpan = mv.getLongitudeSpan();
             m_lat1 = m_lat - 2*latSpan/3;
@@ -135,10 +135,27 @@ public class RouteOverlay extends Overlay
 			    // ... but the last point was.  Draw to this point to finish the path
 			    mv.getProjection().toPixels(gp, thisPoint);
 			    m_path.lineTo(thisPoint.x, thisPoint.y);
+                        } else {
+                            // Neither is in the area of interest.  But, their connecting line 
+                            // might CROSS the area of interest
+                            if (i != 0) {
+                                GeoPoint lastgeo = leg.elementAt(i-1);
+                                Point previous = new Point (lastgeo.getLatitudeE6(),
+                                                            lastgeo.getLongitudeE6());
+                                Point current = new Point(lat, lng);
+                                if (Utils.doExteriorPointsCutRect(previous, current, 
+                                                                  m_lat1, m_lng1,
+                                                                  m_lat2, m_lng2)) {
+                                    mv.getProjection().toPixels(gp, thisPoint);
+                                    mv.getProjection().toPixels(lastgeo, otherPoint);
+                                    m_path.moveTo(otherPoint.x, otherPoint.y);
+                                    m_path.lineTo(thisPoint.x, thisPoint.y);
+                                }
+                            }
                         }
-			drewLastPoint = false;
-		    }
-		}
+                    }
+                    drewLastPoint = false;
+                }
 	    }
 	} else {
 	    // Here, we don't need to calculate a whole new path, but we might need to move the existing one a bit
@@ -146,11 +163,13 @@ public class RouteOverlay extends Overlay
 	    Point thisPoint = new Point();
 	    mv.getProjection().toPixels(new GeoPoint(m_lat, m_lng), lastPoint);
 	    mv.getProjection().toPixels(ctr, thisPoint);
-	    float dx = thisPoint.x - lastPoint.x;
-	    float dy = thisPoint.y - lastPoint.y;
+	    float dx = lastPoint.x - thisPoint.x;
+	    float dy = lastPoint.y - thisPoint.y;
 	    if (dx != 0.0 || dy != 0.0) {
 		m_path.offset(dx, dy);
 	    }
+            m_lat = ctr.getLatitudeE6();
+            m_lng = ctr.getLongitudeE6();
 	}
     }
 
@@ -173,7 +192,7 @@ public class RouteOverlay extends Overlay
 		calculateNewPathIfNeeded(mv);
 
 		// Now, we've got a fully-calculated path.  Put it on the screen (if it's not empty)
-		if (!m_path.isEmpty()) {
+		if (m_path != null && !m_path.isEmpty()) {
 		    Paint paint = new Paint();
 		    paint.setDither(true);
 		    paint.setARGB(126,0,126,255);
