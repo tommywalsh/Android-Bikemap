@@ -12,10 +12,13 @@ import com.google.android.maps.MapView;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.Path;
 import android.graphics.Color;
 import android.os.Handler;
 
+
+import android.util.Log;
 // This class handles drawing of a path on a map.
 
 // The path is stored as KML file, and displayed as a semi-translucent overlay 
@@ -42,10 +45,13 @@ public class RouteOverlay extends Overlay
     // It caches its calculations and tries not to do more work than necessary
     int m_lat;
     int m_lng;
-    int m_latSpan;
-    int m_lngSpan;
+    int m_lat1;
+    int m_lat2;
+    int m_lng1;
+    int m_lng2;
     public void calculateNewPathIfNeeded(MapView mv)
     {
+        if (m_legs.isEmpty()) return;
 
 	boolean shouldCalculate = false;
 	GeoPoint ctr = mv.getMapCenter();
@@ -59,11 +65,11 @@ public class RouteOverlay extends Overlay
 	    // See if we're "off the screen"
 	    // Otherwise, we'll just shift the pixels
 	    int lat = ctr.getLatitudeE6();
-	    int lng = ctr.getLatitudeE6();
-	    if (lat > m_lat + m_latSpan/2 ||
-		lat < m_lat - m_latSpan/2 ||
-		lng > m_lng + m_lngSpan/2 ||
-		lng < m_lng - m_lngSpan/2 ) {
+	    int lng = ctr.getLongitudeE6();
+            if (lat < m_lat1 ||
+                lat > m_lat2 ||
+                lng < m_lng1 ||
+                lng > m_lng2) {
 		shouldCalculate = true;
 	    }
 	}
@@ -77,9 +83,12 @@ public class RouteOverlay extends Overlay
 	    // So, lets set our 'area of interest'...
 	    m_lat = ctr.getLatitudeE6();
 	    m_lng = ctr.getLongitudeE6();
-	    m_latSpan = mv.getLatitudeSpan();
-	    m_lngSpan = mv.getLongitudeSpan();
-
+	    int latSpan = mv.getLatitudeSpan();
+	    int lngSpan = mv.getLongitudeSpan();
+            m_lat1 = m_lat - 2*latSpan/3;
+            m_lat2 = m_lat + 2*latSpan/3;
+            m_lng1 = m_lng - 2*lngSpan/3;
+            m_lng2 = m_lng + 2*lngSpan/3;
 	    
 	    // Each tip may have one or more legs.  Try to draw them all
 	    for (TripLeg leg : m_legs) {
@@ -97,13 +106,13 @@ public class RouteOverlay extends Overlay
 		    Point thisPoint = new Point();
 		    Point otherPoint = new Point();
 		    
-		    
-		    if (lat >= (m_lat - m_latSpan*3/2) && 
-			lat <= (m_lat + m_latSpan*3/2) && 
-			lng >= (m_lng - m_lngSpan*3/2) && 
-			lng <= (m_lng + m_lngSpan*3/2)) {
+                    if (lat >= m_lat1 &&
+                        lat <= m_lat2 &&
+                        lng >= m_lng1 &&
+                        lng <= m_lng2) {
+
 			// This point is in area of interest.  We will need to do some drawing
-			mv.getProjection().toPixels(gp, thisPoint);
+                        mv.getProjection().toPixels(gp, thisPoint);
 			if (drewLastPoint) {
 			    // Last point was also in area of interest... 
 			    // The pen is on the paper.  Draw to the current point.
@@ -113,7 +122,7 @@ public class RouteOverlay extends Overlay
 			    // Pick up the pen and put it there, then draw to the current point.
 			    mv.getProjection().toPixels(leg.elementAt(i-1), otherPoint);
 			    m_path.moveTo(otherPoint.x, otherPoint.y);
-			    m_path.lineTo(thisPoint.x, thisPoint.y); 
+			    m_path.lineTo(thisPoint.x, thisPoint.y);
 			} else {
 			    // This is the first point in the leg.
 			    // Pick up the pen and position it at this point.
@@ -126,7 +135,7 @@ public class RouteOverlay extends Overlay
 			    // ... but the last point was.  Draw to this point to finish the path
 			    mv.getProjection().toPixels(gp, thisPoint);
 			    m_path.lineTo(thisPoint.x, thisPoint.y);
-			}
+                        }
 			drewLastPoint = false;
 		    }
 		}
