@@ -3,11 +3,13 @@ package com.github.tommywalsh.map;
 import android.graphics.Point;
 import android.graphics.Rect;
 
+import android.util.Log;
+
 public class Utils
 {
     private static boolean ccw(Point p1, Point p2, Point p3)
     {
-        return (p3.y-p1.y)*(p2.x-p1.x) > (p2.y-p1.y)*(p3.x*p1.x);
+        return ((float)p3.y-p1.y)*((float)p2.x-p1.x) > ((float)p2.y-p1.y)*((float)p3.x-p1.x);
     }
     
     public static boolean doSegmentsIntersect(Point p1, Point p2, Point p3, Point p4)

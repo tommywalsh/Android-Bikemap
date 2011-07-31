@@ -89,7 +89,8 @@ public class RouteOverlay extends Overlay
             m_lat2 = m_lat + 2*latSpan/3;
             m_lng1 = m_lng - 2*lngSpan/3;
             m_lng2 = m_lng + 2*lngSpan/3;
-	    
+
+
 	    // Each tip may have one or more legs.  Try to draw them all
 	    for (TripLeg leg : m_legs) {
 		
@@ -105,7 +106,7 @@ public class RouteOverlay extends Overlay
 		    int lng = gp.getLongitudeE6();
 		    Point thisPoint = new Point();
 		    Point otherPoint = new Point();
-		    
+
                     if (lat >= m_lat1 &&
                         lat <= m_lat2 &&
                         lng >= m_lng1 &&
@@ -140,12 +141,12 @@ public class RouteOverlay extends Overlay
                             // might CROSS the area of interest
                             if (i != 0) {
                                 GeoPoint lastgeo = leg.elementAt(i-1);
-                                Point previous = new Point (lastgeo.getLatitudeE6(),
-                                                            lastgeo.getLongitudeE6());
-                                Point current = new Point(lat, lng);
+                                Point previous = new Point (lastgeo.getLongitudeE6(),
+                                                            lastgeo.getLatitudeE6());
+                                Point current = new Point(lng, lat);
                                 if (Utils.doExteriorPointsCutRect(previous, current, 
-                                                                  m_lat1, m_lng1,
-                                                                  m_lat2, m_lng2)) {
+                                                                  m_lng1, m_lat1,
+                                                                  m_lng2, m_lat2)) {
                                     mv.getProjection().toPixels(gp, thisPoint);
                                     mv.getProjection().toPixels(lastgeo, otherPoint);
                                     m_path.moveTo(otherPoint.x, otherPoint.y);
@@ -153,8 +154,8 @@ public class RouteOverlay extends Overlay
                                 }
                             }
                         }
+                        drewLastPoint = false;
                     }
-                    drewLastPoint = false;
                 }
 	    }
 	} else {
